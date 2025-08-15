@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: privacy-proxy-browser
+    name: traffic-control
     runtime: node
     plan: starter
     region: oregon
