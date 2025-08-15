@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frogie's Arcade v4</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐸</text></svg>">
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <!-- Main interface -->
+    <div class="container" id="mainContainer">
+        <div class="header">
+            <div class="logo">🐸</div>
+            <div class="controls">
+                <button class="control-btn" title="Link" id="linkBtn">🔗</button>
+                <button class="control-btn" title="Apps" id="appsBtn">⚏</button>
+                <button class="control-btn" title="Games" id="gamesBtn">🎮</button>
+                <button class="control-btn" title="Add" id="addBtn">➕</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h1 class="title">frogie's arcade v4</h1>
+            
+            <div class="apps" id="appsContainer">
+                <a href="#" class="app" data-url="https://www.google.com" style="background: linear-gradient(45deg, #333, #666);">🌀</a>
+                <a href="#" class="app" data-url="https://web.snapchat.com" style="background: #FFFC00;">👻</a>
+                <a href="#" class="app" data-url="https://www.tiktok.com" style="background: linear-gradient(45deg, #ff0050, #00f2ea);">🎵</a>
+                <a href="#" class="app" data-url="https://www.twitch.tv" style="background: #6441A4;">📺</a>
+                <a href="#" class="app" data-url="https://www.youtube.com" style="background: #FF0000;">▶️</a>
+                <a href="#" class="app" data-url="https://discord.com" style="background: #5865F2;">💬</a>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="search anything..." id="searchInput">
+                <button class="search-btn" id="searchBtn">🔍</button>
+            </div>
+
+            <button class="discord-btn" id="discordBtn">join the discord for more links</button>
+            
+            <!-- Status indicators -->
+            <div class="status-indicators">
+                <div class="status-item">
+                    <span class="status-dot online"></span>
+                    <span>Proxy Active</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot encrypted"></span>
+                    <span>Traffic Encrypted</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span>online users: <span id="userCount">0</span></span>
+            <span class="separator">•</span>
+            <span class="server-status" id="serverStatus">connected</span>
+        </div>
+        
+        <div class="settings">
+            <button class="control-btn" title="Settings" id="settingsBtn">⚙️</button>
+            <button class="control-btn" title="About" id="aboutBtn">ℹ️</button>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Establishing secure connection...</p>
+    </div>
+
+    <!-- Settings modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="close-btn" id="closeSettings">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label>Encryption Level</label>
+                    <select id="encryptionLevel">
+                        <option value="high">High (Recommended)</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low (Faster)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>User Agent</label>
+                    <select id="userAgent">
+                        <option value="chrome">Chrome (Windows)</option>
+                        <option value="firefox">Firefox (Windows)</option>
+                        <option value="safari">Safari (macOS)</option>
+                        <option value="edge">Edge (Windows)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Block Scripts</label>
+                    <input type="checkbox" id="blockScripts">
+                    <span class="checkbox-label">Block potentially harmful scripts</span>
+                </div>
+                <div class="setting-group">
+                    <label>Hide Referrer</label>
+                    <input type="checkbox" id="hideReferrer" checked>
+                    <span class="checkbox-label">Hide referrer information</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About modal -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>About Privacy Proxy</h2>
+                <button class="close-btn" id="closeAbout">✕</button>
+            </div>
+            <div class="modal-body">
+                <p>A self-hosted privacy proxy designed to bypass censorship and protect your browsing privacy.</p>
+                <div class="feature-list">
+                    <div class="feature">✓ End-to-end encryption</div>
+                    <div class="feature">✓ No logging policy</div>
+                    <div class="feature">✓ Self-hosted solution</div>
+                    <div class="feature">✓ Real-time user monitoring</div>
+                    <div class="feature">✓ Image and asset proxying</div>
+                </div>
+                <div class="version-info">
+                    <small>Version 4.0.0 • Built with privacy in mind</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
