@@ -4,12 +4,12 @@ const helmet = require('helmet');
 const compression = require('compression');
 const WebSocket = require('ws');
 const http = require('http');
+const https = require('https');
 const cheerio = require('cheerio');
 const crypto = require('crypto');
 const url = require('url');
 const path = require('path');
 const fs = require('fs');
-const { Agent } = require('https');
 
 const app = express();
 const server = http.createServer(app);
@@ -19,7 +19,15 @@ const PORT = process.env.PORT || 8080;
 const SECRET_KEY = process.env.SECRET_KEY || crypto.randomBytes(32).toString('hex');
 
 // Optimized HTTP agent for faster connections
-const httpsAgent = new Agent({
+const httpsAgent = new https.Agent({
+    keepAlive: true,
+    maxSockets: 50,
+    maxFreeSockets: 10,
+    timeout: 5000,
+    freeSocketTimeout: 30000
+});
+
+const httpAgent = new http.Agent({
     keepAlive: true,
     maxSockets: 50,
     maxFreeSockets: 10,
@@ -758,7 +766,7 @@ app.post('/api/search', async (req, res) => {
     }
 });
 
-// Ultra-fast proxy endpoint
+// Ultra-fast proxy endpoint - FIXED
 app.all('/proxy/:encryptedUrl', async (req, res) => {
     const { encryptedUrl } = req.params;
     
@@ -773,7 +781,7 @@ app.all('/proxy/:encryptedUrl', async (req, res) => {
         
         // Ultra-fast fetch with optimized settings
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // Reduced timeout
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         
         let fetchOptions = {
             method: req.method,
@@ -783,11 +791,8 @@ app.all('/proxy/:encryptedUrl', async (req, res) => {
                 'Accept-Encoding': 'gzip, deflate',
                 'Connection': 'keep-alive'
             },
-            signal: controller.signal,
-            compress: true,
-            follow: 3, // Reduced redirects
-            timeout: 8000,
-            agent: httpsAgent
+            signal: controller.signal
+            // Removed agent: httpsAgent since fetch doesn't support it
         };
         
         // Fast POST data handling
@@ -816,14 +821,17 @@ app.all('/proxy/:encryptedUrl', async (req, res) => {
             res.set('Content-Type', 'text/html; charset=utf-8');
             res.send(processedHtml);
         } else {
-            // Stream other content types for maximum speed
-            response.body.pipe(res);
+            // FIXED: Convert ReadableStream to Buffer
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
             res.set('Content-Type', contentType);
             
             // Set cache headers for static assets
             if (contentType.includes('image/') || contentType.includes('text/css') || contentType.includes('javascript')) {
                 res.set('Cache-Control', 'public, max-age=3600');
             }
+            
+            res.send(buffer);
         }
         
     } catch (error) {
@@ -877,7 +885,7 @@ app.all('/proxy/:encryptedUrl', async (req, res) => {
     }
 });
 
-// Ultra-fast image proxy
+// Ultra-fast image proxy - FIXED
 app.get('/image/:encryptedUrl', async (req, res) => {
     const { encryptedUrl } = req.params;
     
@@ -889,15 +897,14 @@ app.get('/image/:encryptedUrl', async (req, res) => {
         }
         
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // Faster timeout
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         
         const response = await fetch(targetUrl, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 'Referer': new URL(targetUrl).origin
             },
-            signal: controller.signal,
-            agent: httpsAgent
+            signal: controller.signal
         });
         
         clearTimeout(timeoutId);
@@ -908,10 +915,12 @@ app.get('/image/:encryptedUrl', async (req, res) => {
         
         const contentType = response.headers.get('content-type');
         res.set('Content-Type', contentType);
-        res.set('Cache-Control', 'public, max-age=7200'); // Longer cache
+        res.set('Cache-Control', 'public, max-age=7200');
         
-        // Stream for speed
-        response.body.pipe(res);
+        // FIXED: Convert ReadableStream to Buffer and send
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        res.send(buffer);
         
     } catch (error) {
         console.error('Image proxy error:', error.message);
@@ -922,7 +931,7 @@ app.get('/image/:encryptedUrl', async (req, res) => {
     }
 });
 
-// Ultra-fast asset proxy
+// Ultra-fast asset proxy - FIXED
 app.get('/asset/:encryptedUrl', async (req, res) => {
     const { encryptedUrl } = req.params;
     
@@ -941,8 +950,7 @@ app.get('/asset/:encryptedUrl', async (req, res) => {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 'Referer': new URL(targetUrl).origin
             },
-            signal: controller.signal,
-            agent: httpsAgent
+            signal: controller.signal
         });
         
         clearTimeout(timeoutId);
@@ -971,8 +979,10 @@ app.get('/asset/:encryptedUrl', async (req, res) => {
             });
             res.send(content);
         } else {
-            // Stream everything else
-            response.body.pipe(res);
+            // FIXED: Convert to buffer and send
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            res.send(buffer);
         }
         
     } catch (error) {
