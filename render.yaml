@@ -1,0 +1,66 @@
+services:
+  - type: web
+    name: privacy-proxy-browser
+    runtime: node
+    plan: starter
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    
+    # Environment variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: SECRET_KEY
+        generateValue: true
+        
+    # Disk storage for caching (optional)
+    disk:
+      name: cache
+      mountPath: /tmp/cache
+      sizeGB: 1
+      
+    # Resource allocation
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+      
+    # Health check configuration
+    healthCheck:
+      httpPath: /api/user-count
+      initialDelaySeconds: 30
+      timeoutSeconds: 10
+      
+    # Custom headers for security
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+      - path: /*
+        name: X-XSS-Protection
+        value: 1; mode=block
+      - path: /*
+        name: Strict-Transport-Security
+        value: max-age=31536000; includeSubDomains
+        
+    # Route configuration
+    routes:
+      - type: rewrite
+        source: /proxy/*
+        destination: /proxy/$1
+      - type: rewrite  
+        source: /image/*
+        destination: /image/$1
+      - type: rewrite
+        source: /asset/*
+        destination: /asset/$1
