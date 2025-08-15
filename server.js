@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const compression = require('compression');
 const WebSocket = require('ws');
 const http = require('http');
-const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 const crypto = require('crypto');
 const url = require('url');
