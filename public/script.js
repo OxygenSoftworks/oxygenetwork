@@ -1,4 +1,27 @@
 // WebSocket connection for real-time user count
+
+// POLYFILL FOR COMMONJS
+import('node:http').then((http) => {
+  globalThis.fetch = (url, options = {}) => {
+    return new Promise((resolve, reject) => {
+      const req = http.request(url, options, (res) => {
+        let data = [];
+        res.on('data', chunk => data.push(chunk));
+        res.on('end', () => resolve({
+          ok: res.statusCode >= 200 && res.statusCode < 300,
+          status: res.statusCode,
+          text: () => Promise.resolve(Buffer.concat(data).toString()),
+          json: () => Promise.resolve(JSON.parse(Buffer.concat(data).toString()))
+        }));
+      });
+      req.on('error', reject);
+      if (options.body) req.write(options.body);
+      req.end();
+    });
+  };
+});
+
+
 let ws;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 5;
