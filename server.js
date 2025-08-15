@@ -132,10 +132,13 @@ if (wss) {
 // Utility functions with error handling
 function encryptUrl(targetUrl) {
     try {
-        const cipher = crypto.createCipher('aes-256-cbc', SECRET_KEY);
+        const algorithm = 'aes-256-cbc';
+        const key = crypto.scryptSync(SECRET_KEY, 'salt', 32);
+        const iv = crypto.randomBytes(16);
+        const cipher = crypto.createCipheriv(algorithm, key, iv);
         let encrypted = cipher.update(targetUrl, 'utf8', 'hex');
         encrypted += cipher.final('hex');
-        return encrypted;
+        return iv.toString('hex') + ':' + encrypted;
     } catch (error) {
         console.error('Encryption error:', error.message);
         throw new Error('Failed to encrypt URL');
@@ -144,8 +147,13 @@ function encryptUrl(targetUrl) {
 
 function decryptUrl(encryptedUrl) {
     try {
-        const decipher = crypto.createDecipher('aes-256-cbc', SECRET_KEY);
-        let decrypted = decipher.update(encryptedUrl, 'hex', 'utf8');
+        const algorithm = 'aes-256-cbc';
+        const key = crypto.scryptSync(SECRET_KEY, 'salt', 32);
+        const parts = encryptedUrl.split(':');
+        const iv = Buffer.from(parts.shift(), 'hex');
+        const encrypted = parts.join(':');
+        const decipher = crypto.createDecipheriv(algorithm, key, iv);
+        let decrypted = decipher.update(encrypted, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         return decrypted;
     } catch (error) {
@@ -153,6 +161,7 @@ function decryptUrl(encryptedUrl) {
         return null;
     }
 }
+
 
 function isValidUrl(string) {
     try {
